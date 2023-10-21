@@ -22,16 +22,12 @@ def create_docs(project_name):
 
 def create_venv(project_name):
     import subprocess
+    import time
     # Create a virtual environment
-    subprocess.run(['python', '-m', 'venv', 'venv'], check=True)
+    subprocess.run(['python3', '-m', 'venv', 'venv', '&&', 'source', 'venv/bin/activate'], shell=True, check=True)
+    # Install requirements
 
-    # Activate the virtual environment and install dependencies
-    activate_script = 'venv/bin/activate'
-    activate_cmd = f'source {activate_script}'
-    
-    install_cmd = f'{activate_cmd} && pip install -r ./docs/requirements.txt'
-    # Run the installation command
-    subprocess.run(install_cmd, shell=True, check=True)
+    subprocess.run(['pip', 'install', '-r', 'requirements.txt'], shell=True, check=True)
     
 def create_src(project_name):
     src_dir = os.path.join(project_name, 'src')
@@ -58,7 +54,14 @@ def create_project(project_name, modules):
     # Create project directory if it doesn't exist
     os.makedirs(project_name, exist_ok=True)
     os.makedirs(os.path.join(project_name, 'modules'), exist_ok=True)
-    os.chdir(project_name)
+    create_docs(project_name)
+    create_src(project_name)
+    create_data(project_name)
+    create_tests(project_name)
+    os.chdir('./' + project_name)
+    create_venv(project_name)
+    for module_name in modules:
+        create_test_module(module_name)
 
     with open('main.py', 'w') as main_file:
         for module_name in modules:
@@ -76,18 +79,10 @@ def create_project(project_name, modules):
             module_file.write(f'\tprint("Function {cleaned_name} called!")')
             module_file.write('\nif __name__ == "__main__":\n')
             module_file.write(f'\t{cleaned_name}()')
-    create_tests(project_name)
-    create_docs(project_name)
-    create_venv(project_name)
-    create_src(project_name)
-    create_data(project_name)
     print(f'Project {project_name} created successfully!')
 
 if __name__ == "__main__":
     project_name = input("Enter project name: ").strip()
     modules_input = input("Enter module names (comma-separated, e.g., first,second): ").strip()
     modules = [module.strip() for module in modules_input.split(',')]
-
-    for module_name in modules:
-        create_test_module(module_name)
     create_project(project_name, modules)
