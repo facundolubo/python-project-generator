@@ -4,12 +4,49 @@ def clean_module_name(module_name):
     # Replace spaces and special characters with underscores in module name
     return ''.join(c if c.isalnum() or c.isspace() else '_' for c in module_name)
 
-def create_test_module(project_name, module_name):
-    cleaned_name = clean_module_name(module_name)
+def create_tests(project_name):
     tests_dir = os.path.join(project_name, 'tests')
     # Create 'tests' directory inside the project folder if it doesn't exist
     os.makedirs(tests_dir, exist_ok=True)
-    with open(os.path.join(tests_dir, f'test_{cleaned_name}.py'), 'w') as test_file:
+
+def create_docs(project_name):
+    docs_dir = os.path.join(project_name, 'docs')
+    # Create 'docs' directory inside the project folder if it doesn't exist
+    os.makedirs(docs_dir, exist_ok=True)
+    with open(os.path.join(docs_dir, 'readme.md'), 'w') as docs_file:
+        docs_file.write('"""\n' + 'Documentation for project' + '\n' + '"""\n')
+    with open(os.path.join(docs_dir, 'requirements.txt'), 'w') as docs_file:
+        docs_file.write('"""\n' + 'Requirements for project' + '\n' + '"""\n')
+        docs_file.write('pytest\n')
+        docs_file.write('pylint\n')
+
+def create_venv(project_name):
+    import subprocess
+    # Create a virtual environment
+    subprocess.run(['python', '-m', 'venv', 'venv'], check=True)
+
+    # Activate the virtual environment and install dependencies
+    activate_script = 'venv/bin/activate'
+    activate_cmd = f'source {activate_script}'
+    
+    install_cmd = f'{activate_cmd} && pip install -r ./docs/requirements.txt'
+    # Run the installation command
+    subprocess.run(install_cmd, shell=True, check=True)
+    
+def create_src(project_name):
+    src_dir = os.path.join(project_name, 'src')
+    # Create 'src' directory inside the project folder if it doesn't exist
+    os.makedirs(src_dir, exist_ok=True)
+
+def create_data(project_name):
+    data_dir = os.path.join(project_name, 'data')
+    # Create 'data' directory inside the project folder if it doesn't exist
+    os.makedirs(data_dir, exist_ok=True)
+
+def create_test_module(module_name):
+    cleaned_name = clean_module_name(module_name)
+    # Create 'tests' directory inside the project folder if it doesn't exist
+    with open(os.path.join('./tests', f'test_{cleaned_name}.py'), 'w') as test_file:
         test_file.write('"""\n' + f'docstring for {cleaned_name}\n' + '"""\n')
         test_file.write('import unittest\n')
         test_file.write(f'import modules.{cleaned_name}\n\n')
@@ -20,9 +57,6 @@ def create_test_module(project_name, module_name):
 def create_project(project_name, modules):
     # Create project directory if it doesn't exist
     os.makedirs(project_name, exist_ok=True)
-    # Create 'tests' directory inside the project folder if it doesn't exist
-    os.makedirs(os.path.join(project_name, 'tests'), exist_ok=True)
-    # Create 'modules' directory inside the project folder if it doesn't exist
     os.makedirs(os.path.join(project_name, 'modules'), exist_ok=True)
     os.chdir(project_name)
 
@@ -42,13 +76,11 @@ def create_project(project_name, modules):
             module_file.write(f'\tprint("Function {cleaned_name} called!")')
             module_file.write('\nif __name__ == "__main__":\n')
             module_file.write(f'\t{cleaned_name}()')
-    with open('requirements.txt', 'w') as requirements_file:
-        requirements_file.write('pytest\n')
-        requirements_file.write('pytest-cov\n')
-        requirements_file.write('pylint\n')
-        requirements_file.write('flake8\n')
-        requirements_file.write('black\n')
-
+    create_tests(project_name)
+    create_docs(project_name)
+    create_venv(project_name)
+    create_src(project_name)
+    create_data(project_name)
     print(f'Project {project_name} created successfully!')
 
 if __name__ == "__main__":
@@ -57,5 +89,5 @@ if __name__ == "__main__":
     modules = [module.strip() for module in modules_input.split(',')]
 
     for module_name in modules:
-        create_test_module(project_name, module_name)
+        create_test_module(module_name)
     create_project(project_name, modules)
