@@ -1,4 +1,10 @@
+#!/usr/bin/env python3
+
+#Haciendo cambios
+#Aca tambien
+
 import os
+
 
 def clean_module_name(module_name):
     # Replace spaces and special characters with underscores in module name
@@ -19,16 +25,23 @@ def create_docs(project_name):
         docs_file.write('"""\n' + 'Requirements for project' + '\n' + '"""\n')
         docs_file.write('pytest\n')
         docs_file.write('pylint\n')
+    with open('.gitignore' , 'w') as docs_file:
+        docs_file.write('.venv\n')
+
 
 def create_venv(project_name):
     import subprocess
     import time
     # Create a virtual environment
-    subprocess.run(['python3', '-m', 'venv', 'venv', '&&', 'source', 'venv/bin/activate'], shell=True, check=True)
+    subprocess.run('python3 -m venv .venv', shell=True, check=True)
+    time.sleep(1)
+    os.chdir(path='.venv')
+    subprocess.run('source bin/activate', shell=True, check=True)
+    time.sleep(1)
     # Install requirements
+    subprocess.run('pip install -r docs/requirements.txt', shell=True, check=True)
+    os.chdir(path='..')
 
-    subprocess.run(['pip', 'install', '-r', 'requirements.txt'], shell=True, check=True)
-    
 def create_src(project_name):
     src_dir = os.path.join(project_name, 'src')
     # Create 'src' directory inside the project folder if it doesn't exist
@@ -82,6 +95,7 @@ def create_project(project_name, modules):
     print(f'Project {project_name} created successfully!')
 
 if __name__ == "__main__":
+    path = os.getcwd()
     project_name = input("Enter project name: ").strip()
     modules_input = input("Enter module names (comma-separated, e.g., first,second): ").strip()
     modules = [module.strip() for module in modules_input.split(',')]

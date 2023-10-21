@@ -1,5 +1,0 @@
-"""
-Requirements for project
-"""
-pytest
-pylint
